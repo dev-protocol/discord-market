@@ -24,7 +24,7 @@ contract DiscordMarketV2 is
 	// event
 	event Registered(address _metrics, string _repository);
 	event Authenticated(string _repository, uint256 _status, string message);
-	event Query(string discordChannel, string publicSignature, address account);
+	event Query(string discordGuild, string publicSignature, address account);
 
 	function initialize() external initializer {
 		__AccessControl_init();
@@ -35,8 +35,8 @@ contract DiscordMarketV2 is
 	}
 
 	/*
-    _discordChannel: ex)
-                        Discord channel id: UCN7m74tFgJJnoGL4zk6aJ6g
+    _discordGuild: ex)
+                        Discord guild id: 80351110224678912
     _publicSignature: signature string(created by Khaos)
     */
 	function authenticate(
@@ -46,17 +46,17 @@ contract DiscordMarketV2 is
 	) external override whenNotPaused returns (bool) {
 		require(msg.sender == associatedMarket, "invalid sender");
 		require(_args.length == 2, "args error");
-		string memory discordChannel = _args[0];
+		string memory discordGuild = _args[0];
 		string memory publicSignature = _args[1];
-		bytes32 key = createKey(discordChannel);
-		emit Query(discordChannel, publicSignature, account);
+		bytes32 key = createKey(discordGuild);
+		emit Query(discordGuild, publicSignature, account);
 		properties[key] = _prop;
 		pendingAuthentication[key] = true;
 		return true;
 	}
 
 	function khaosCallback(
-		string memory _discordChannel,
+		string memory _discordGuild,
 		uint256 _status,
 		string memory _message
 	) external whenNotPaused {
@@ -66,10 +66,10 @@ contract DiscordMarketV2 is
 			"illegal access"
 		);
 		require(_status == 0, _message);
-		bytes32 key = createKey(_discordChannel);
+		bytes32 key = createKey(_discordGuild);
 		require(pendingAuthentication[key], "not while pending");
-		emit Authenticated(_discordChannel, _status, _message);
-		register(key, _discordChannel, properties[key]);
+		emit Authenticated(_discordGuild, _status, _message);
+		register(key, _discordGuild, properties[key]);
 	}
 
 	function register(
