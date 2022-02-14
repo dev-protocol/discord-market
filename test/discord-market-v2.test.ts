@@ -7,10 +7,10 @@ import { expect, use } from 'chai'
 import { ethers, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { solidity } from 'ethereum-waffle'
-import YouTubeMarketV2Artifact from '../artifacts/contracts/YouTubeMarketV2.sol/YouTubeMarketV2.json'
+import DiscordMarketV2Artifact from '../artifacts/contracts/DiscordMarketV2.sol/DiscordMarketV2.json'
 import MarketAdminArtifact from '../artifacts/contracts/MarketAdmin.sol/MarketAdmin.json'
 import MarketProxyArtifact from '../artifacts/contracts/MarketProxy.sol/MarketProxy.json'
-import { YouTubeMarketV2, MarketAdmin, MarketProxy } from '../typechain-types'
+import { DiscordMarketV2, MarketAdmin, MarketProxy } from '../typechain-types'
 
 use(solidity)
 
@@ -24,10 +24,10 @@ type Signers = {
 }
 
 type Markets = {
-	deployer: YouTubeMarketV2
-	khaos: YouTubeMarketV2
-	user: YouTubeMarketV2
-	associatedMarket: YouTubeMarketV2
+	deployer: DiscordMarketV2
+	khaos: DiscordMarketV2
+	user: DiscordMarketV2
+	associatedMarket: DiscordMarketV2
 }
 
 const getSigners = async (): Promise<Signers> => {
@@ -40,7 +40,7 @@ const getSigners = async (): Promise<Signers> => {
 	}
 }
 
-const getMarketsWithoutAdmin = (markets: Markets): YouTubeMarketV2[] => [
+const getMarketsWithoutAdmin = (markets: Markets): DiscordMarketV2[] => [
 	markets.khaos,
 	markets.user,
 	markets.associatedMarket,
@@ -50,8 +50,8 @@ const init = async (): Promise<Markets> => {
 	const signers = await getSigners()
 	const marketBehavior = (await deployContract(
 		signers.deployer,
-		YouTubeMarketV2Artifact
-	)) as YouTubeMarketV2
+		DiscordMarketV2Artifact
+	)) as DiscordMarketV2
 	const admin = (await deployContract(
 		signers.deployer,
 		MarketAdminArtifact
@@ -62,14 +62,14 @@ const init = async (): Promise<Markets> => {
 		admin.address,
 		data,
 	])) as MarketProxy
-	const YouTubeMarketV2Factory = await ethers.getContractFactory(
-		YouTubeMarketV2Artifact.abi,
-		YouTubeMarketV2Artifact.bytecode,
+	const DiscordMarketV2Factory = await ethers.getContractFactory(
+		DiscordMarketV2Artifact.abi,
+		DiscordMarketV2Artifact.bytecode,
 		signers.deployer
 	)
-	const proxyMarket = YouTubeMarketV2Factory.attach(
+	const proxyMarket = DiscordMarketV2Factory.attach(
 		proxy.address
-	) as YouTubeMarketV2
+	) as DiscordMarketV2
 	await proxyMarket.initialize()
 	await proxyMarket.addKhaosRole(signers.khaos.address)
 	return {
@@ -94,7 +94,7 @@ const init3 = async (): Promise<[Markets, string, string]> => {
 	await markets.deployer.setAssociatedMarket(signers.associatedMarket.address)
 	await markets.associatedMarket.authenticate(
 		property.address,
-		['user/repository', 'dummy-signature'],
+		['discord-guild-id', 'dummy-signature'],
 		signers.user.address
 	)
 	const associatedMarket = await deployMockContract(signers.deployer, [
@@ -126,7 +126,7 @@ const init3 = async (): Promise<[Markets, string, string]> => {
 	await markets.deployer.setAssociatedMarket(associatedMarket.address)
 	const metrics = provider.createEmptyWallet()
 	const key = ethers.utils.keccak256(
-		ethers.utils.toUtf8Bytes('user/repository')
+		ethers.utils.toUtf8Bytes('discord-guild-id')
 	)
 
 	await associatedMarket.mock.authenticatedCallback
@@ -135,7 +135,7 @@ const init3 = async (): Promise<[Markets, string, string]> => {
 	return [markets, property.address, metrics.address]
 }
 
-describe('YouTubeMarketV2', () => {
+describe('DiscordMarketV2', () => {
 	describe('initialize', () => {
 		describe('fail', () => {
 			it('Cannot be executed multiple times.', async () => {
@@ -150,7 +150,7 @@ describe('YouTubeMarketV2', () => {
 	describe('name', () => {
 		it("Returns this market's name.", async () => {
 			const market = (await init()).deployer
-			expect(await market.name()).to.equal('YouTube')
+			expect(await market.name()).to.equal('Discord')
 		})
 	})
 
@@ -158,7 +158,7 @@ describe('YouTubeMarketV2', () => {
 		it("Returns this market's schema.", async () => {
 			const market = (await init()).deployer
 			expect(await market.schema()).to.equal(
-				'["YouTube Channel (e.g, UCN7m74tFgJJnoGL4zk6aJ6g)", "Khaos Public Signature"]'
+				'["Discord Guild (e.g, 80351110224678912)", "Khaos Public Signature"]'
 			)
 		})
 	})
@@ -299,12 +299,12 @@ describe('YouTubeMarketV2', () => {
 				await expect(
 					markets.associatedMarket.authenticate(
 						property.address,
-						['user/repository', 'dummy-signature'],
+						['discord-guild-id', 'dummy-signature'],
 						signers.user.address
 					)
 				)
 					.to.emit(markets.associatedMarket, 'Query')
-					.withArgs('user/repository', 'dummy-signature', signers.user.address)
+					.withArgs('discord-guild-id', 'dummy-signature', signers.user.address)
 			})
 		})
 		describe('fail', () => {
@@ -315,7 +315,7 @@ describe('YouTubeMarketV2', () => {
 				await expect(
 					markets.associatedMarket.authenticate(
 						property.address,
-						['user/repository'],
+						['discord-guild-id'],
 						signers.user.address
 					)
 				).to.be.revertedWith('args error')
@@ -328,7 +328,7 @@ describe('YouTubeMarketV2', () => {
 				await expect(
 					markets.associatedMarket.authenticate(
 						property.address,
-						['user/repository', 'dummy-signature'],
+						['discord-guild-id', 'dummy-signature'],
 						signers.user.address
 					)
 				).to.be.revertedWith('Pausable: paused')
@@ -341,7 +341,7 @@ describe('YouTubeMarketV2', () => {
 					await expect(
 						market.authenticate(
 							property.address,
-							['user/repository', 'dummy-signature'],
+							['discord-guild-id', 'dummy-signature'],
 							signers.user.address
 						)
 					).to.be.revertedWith('invalid sender')
@@ -352,8 +352,8 @@ describe('YouTubeMarketV2', () => {
 	describe('khaosCallback', () => {
 		const getMarketsWithoutAdminAndKhaos = (
 			markets: Markets
-		): YouTubeMarketV2[] => [markets.user, markets.associatedMarket]
-		const getAdminAndKhaosMarkets = (markets: Markets): YouTubeMarketV2[] => [
+		): DiscordMarketV2[] => [markets.user, markets.associatedMarket]
+		const getAdminAndKhaosMarkets = (markets: Markets): DiscordMarketV2[] => [
 			markets.deployer,
 			markets.khaos,
 		]
@@ -362,35 +362,35 @@ describe('YouTubeMarketV2', () => {
 				const [markets] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await expect(market.khaosCallback('user/repository', 0, ''))
+					await expect(market.khaosCallback('discord-guild-id', 0, ''))
 						.to.emit(market, 'Authenticated')
-						.withArgs('user/repository', '0', '')
+						.withArgs('discord-guild-id', '0', '')
 				}
 			})
 			it('Registered event data is created.', async () => {
 				const [markets, , metrics] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await expect(market.khaosCallback('user/repository', 0, ''))
+					await expect(market.khaosCallback('discord-guild-id', 0, ''))
 						.to.emit(market, 'Registered')
-						.withArgs(metrics, 'user/repository')
+						.withArgs(metrics, 'discord-guild-id')
 				}
 			})
 			it('get id.', async () => {
 				const [markets, , metrics] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await market.khaosCallback('user/repository', 0, '')
+					await market.khaosCallback('discord-guild-id', 0, '')
 					const id = await market.getId(metrics)
-					expect(id).to.be.equal('user/repository')
+					expect(id).to.be.equal('discord-guild-id')
 				}
 			})
 			it('get metrics.', async () => {
 				const [markets, , metrics] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await market.khaosCallback('user/repository', 0, '')
-					const result = await market.getMetrics('user/repository')
+					await market.khaosCallback('discord-guild-id', 0, '')
+					const result = await market.getMetrics('discord-guild-id')
 					expect(result).to.be.equal(metrics)
 				}
 			})
@@ -401,7 +401,7 @@ describe('YouTubeMarketV2', () => {
 				const targetMarkets = getMarketsWithoutAdminAndKhaos(markets)
 				for (const market of targetMarkets) {
 					await expect(
-						market.khaosCallback('user/repository', 0, '')
+						market.khaosCallback('discord-guild-id', 0, '')
 					).to.be.revertedWith('illegal access')
 				}
 			})
@@ -409,7 +409,7 @@ describe('YouTubeMarketV2', () => {
 				const [markets] = await init3()
 				const market = markets.deployer
 				await expect(
-					market.khaosCallback('user/repository', 1, 'error message')
+					market.khaosCallback('discord-guild-id', 1, 'error message')
 				).to.be.revertedWith('error message')
 			})
 			it('not authenticate.', async () => {
@@ -420,7 +420,7 @@ describe('YouTubeMarketV2', () => {
 				)
 				const market = markets.deployer
 				await expect(
-					market.khaosCallback('user/repository', 0, '')
+					market.khaosCallback('discord-guild-id', 0, '')
 				).to.be.revertedWith('not while pending')
 			})
 		})
