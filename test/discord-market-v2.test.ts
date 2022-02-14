@@ -158,7 +158,7 @@ describe('DiscordMarketV2', () => {
 		it("Returns this market's schema.", async () => {
 			const market = (await init()).deployer
 			expect(await market.schema()).to.equal(
-				'["Discord guild id (e.g, 80351110224678912)", "Khaos Public Signature"]'
+				'["Discord Guild (e.g, 80351110224678912)", "Khaos Public Signature"]'
 			)
 		})
 	})
