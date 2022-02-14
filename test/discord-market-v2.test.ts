@@ -94,7 +94,7 @@ const init3 = async (): Promise<[Markets, string, string]> => {
 	await markets.deployer.setAssociatedMarket(signers.associatedMarket.address)
 	await markets.associatedMarket.authenticate(
 		property.address,
-		['user/repository', 'dummy-signature'],
+		['discord-guild-id', 'dummy-signature'],
 		signers.user.address
 	)
 	const associatedMarket = await deployMockContract(signers.deployer, [
@@ -126,7 +126,7 @@ const init3 = async (): Promise<[Markets, string, string]> => {
 	await markets.deployer.setAssociatedMarket(associatedMarket.address)
 	const metrics = provider.createEmptyWallet()
 	const key = ethers.utils.keccak256(
-		ethers.utils.toUtf8Bytes('user/repository')
+		ethers.utils.toUtf8Bytes('discord-guild-id')
 	)
 
 	await associatedMarket.mock.authenticatedCallback
@@ -299,12 +299,12 @@ describe('DiscordMarketV2', () => {
 				await expect(
 					markets.associatedMarket.authenticate(
 						property.address,
-						['user/repository', 'dummy-signature'],
+						['discord-guild-id', 'dummy-signature'],
 						signers.user.address
 					)
 				)
 					.to.emit(markets.associatedMarket, 'Query')
-					.withArgs('user/repository', 'dummy-signature', signers.user.address)
+					.withArgs('discord-guild-id', 'dummy-signature', signers.user.address)
 			})
 		})
 		describe('fail', () => {
@@ -315,7 +315,7 @@ describe('DiscordMarketV2', () => {
 				await expect(
 					markets.associatedMarket.authenticate(
 						property.address,
-						['user/repository'],
+						['discord-guild-id'],
 						signers.user.address
 					)
 				).to.be.revertedWith('args error')
@@ -328,7 +328,7 @@ describe('DiscordMarketV2', () => {
 				await expect(
 					markets.associatedMarket.authenticate(
 						property.address,
-						['user/repository', 'dummy-signature'],
+						['discord-guild-id', 'dummy-signature'],
 						signers.user.address
 					)
 				).to.be.revertedWith('Pausable: paused')
@@ -341,7 +341,7 @@ describe('DiscordMarketV2', () => {
 					await expect(
 						market.authenticate(
 							property.address,
-							['user/repository', 'dummy-signature'],
+							['discord-guild-id', 'dummy-signature'],
 							signers.user.address
 						)
 					).to.be.revertedWith('invalid sender')
@@ -362,35 +362,35 @@ describe('DiscordMarketV2', () => {
 				const [markets] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await expect(market.khaosCallback('user/repository', 0, ''))
+					await expect(market.khaosCallback('discord-guild-id', 0, ''))
 						.to.emit(market, 'Authenticated')
-						.withArgs('user/repository', '0', '')
+						.withArgs('discord-guild-id', '0', '')
 				}
 			})
 			it('Registered event data is created.', async () => {
 				const [markets, , metrics] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await expect(market.khaosCallback('user/repository', 0, ''))
+					await expect(market.khaosCallback('discord-guild-id', 0, ''))
 						.to.emit(market, 'Registered')
-						.withArgs(metrics, 'user/repository')
+						.withArgs(metrics, 'discord-guild-id')
 				}
 			})
 			it('get id.', async () => {
 				const [markets, , metrics] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await market.khaosCallback('user/repository', 0, '')
+					await market.khaosCallback('discord-guild-id', 0, '')
 					const id = await market.getId(metrics)
-					expect(id).to.be.equal('user/repository')
+					expect(id).to.be.equal('discord-guild-id')
 				}
 			})
 			it('get metrics.', async () => {
 				const [markets, , metrics] = await init3()
 				const targetMarkets = getAdminAndKhaosMarkets(markets)
 				for (const market of targetMarkets) {
-					await market.khaosCallback('user/repository', 0, '')
-					const result = await market.getMetrics('user/repository')
+					await market.khaosCallback('discord-guild-id', 0, '')
+					const result = await market.getMetrics('discord-guild-id')
 					expect(result).to.be.equal(metrics)
 				}
 			})
@@ -401,7 +401,7 @@ describe('DiscordMarketV2', () => {
 				const targetMarkets = getMarketsWithoutAdminAndKhaos(markets)
 				for (const market of targetMarkets) {
 					await expect(
-						market.khaosCallback('user/repository', 0, '')
+						market.khaosCallback('discord-guild-id', 0, '')
 					).to.be.revertedWith('illegal access')
 				}
 			})
@@ -409,7 +409,7 @@ describe('DiscordMarketV2', () => {
 				const [markets] = await init3()
 				const market = markets.deployer
 				await expect(
-					market.khaosCallback('user/repository', 1, 'error message')
+					market.khaosCallback('discord-guild-id', 1, 'error message')
 				).to.be.revertedWith('error message')
 			})
 			it('not authenticate.', async () => {
@@ -420,7 +420,7 @@ describe('DiscordMarketV2', () => {
 				)
 				const market = markets.deployer
 				await expect(
-					market.khaosCallback('user/repository', 0, '')
+					market.khaosCallback('discord-guild-id', 0, '')
 				).to.be.revertedWith('not while pending')
 			})
 		})
