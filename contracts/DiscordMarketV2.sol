@@ -146,7 +146,7 @@ contract DiscordMarketV2 is
 	function schema() external pure override returns (string memory) {
 		return
 			// solhint-disable-next-line quotes
-			'["Discord guild id (e.g, 80351110224678912)", "Khaos Public Signature"]';
+			'["Discord Guild (e.g, 80351110224678912)", "Khaos Public Signature"]';
 	}
 
 	function pause() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
