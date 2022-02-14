@@ -6,7 +6,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {IMarketBehavior} from "@devprotocol/protocol-v2/contracts/interface/IMarketBehavior.sol";
 import {IMarket} from "@devprotocol/protocol-v2/contracts/interface/IMarket.sol";
 
-contract YouTubeMarketV2 is
+contract DiscordMarketV2 is
 	IMarketBehavior,
 	PausableUpgradeable,
 	AccessControlUpgradeable
@@ -24,7 +24,7 @@ contract YouTubeMarketV2 is
 	// event
 	event Registered(address _metrics, string _repository);
 	event Authenticated(string _repository, uint256 _status, string message);
-	event Query(string youtubeChannel, string publicSignature, address account);
+	event Query(string discordChannel, string publicSignature, address account);
 
 	function initialize() external initializer {
 		__AccessControl_init();
@@ -35,8 +35,8 @@ contract YouTubeMarketV2 is
 	}
 
 	/*
-    _youtubeChannel: ex)
-                        YouTube channel id: UCN7m74tFgJJnoGL4zk6aJ6g
+    _discordChannel: ex)
+                        Discord channel id: UCN7m74tFgJJnoGL4zk6aJ6g
     _publicSignature: signature string(created by Khaos)
     */
 	function authenticate(
@@ -46,17 +46,17 @@ contract YouTubeMarketV2 is
 	) external override whenNotPaused returns (bool) {
 		require(msg.sender == associatedMarket, "invalid sender");
 		require(_args.length == 2, "args error");
-		string memory youtubeChannel = _args[0];
+		string memory discordChannel = _args[0];
 		string memory publicSignature = _args[1];
-		bytes32 key = createKey(youtubeChannel);
-		emit Query(youtubeChannel, publicSignature, account);
+		bytes32 key = createKey(discordChannel);
+		emit Query(discordChannel, publicSignature, account);
 		properties[key] = _prop;
 		pendingAuthentication[key] = true;
 		return true;
 	}
 
 	function khaosCallback(
-		string memory _youtubeChannel,
+		string memory _discordChannel,
 		uint256 _status,
 		string memory _message
 	) external whenNotPaused {
@@ -66,10 +66,10 @@ contract YouTubeMarketV2 is
 			"illegal access"
 		);
 		require(_status == 0, _message);
-		bytes32 key = createKey(_youtubeChannel);
+		bytes32 key = createKey(_discordChannel);
 		require(pendingAuthentication[key], "not while pending");
-		emit Authenticated(_youtubeChannel, _status, _message);
-		register(key, _youtubeChannel, properties[key]);
+		emit Authenticated(_discordChannel, _status, _message);
+		register(key, _discordChannel, properties[key]);
 	}
 
 	function register(
@@ -140,13 +140,13 @@ contract YouTubeMarketV2 is
 	}
 
 	function name() external pure override returns (string memory) {
-		return "YouTube";
+		return "Discord";
 	}
 
 	function schema() external pure override returns (string memory) {
 		return
 			// solhint-disable-next-line quotes
-			'["YouTube Channel (e.g, UCN7m74tFgJJnoGL4zk6aJ6g)", "Khaos Public Signature"]';
+			'["Discord guild id (e.g, 80351110224678912)", "Khaos Public Signature"]';
 	}
 
 	function pause() external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {

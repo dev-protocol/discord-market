@@ -8,9 +8,9 @@ async function main() {
 	const khaosWallet = ''
 	//!!!!!!!!!!!!!!!!!!!!!!
 
-	// YouTubeMarketV2
+	// DiscordMarketV2
 	const youTubeMarketV2Factory = await ethers.getContractFactory(
-		'YouTubeMarketV2'
+		'DiscordMarketV2'
 	)
 	const youTubeMarketV2 = await youTubeMarketV2Factory.deploy()
 	await youTubeMarketV2.deployed()
@@ -30,7 +30,7 @@ async function main() {
 	await proxy.initialize()
 	await proxy.addKhaosRole(khaosWallet)
 
-	console.log('youtube market v2 deployed to:', youTubeMarketV2.address)
+	console.log('discord market v2 deployed to:', youTubeMarketV2.address)
 	console.log('market v2 proxy deployed to:', marketProxy.address)
 	console.log('market proxy v2 khaosRole is attached to:', khaosWallet)
 }
