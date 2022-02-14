@@ -9,26 +9,26 @@ async function main() {
 	//!!!!!!!!!!!!!!!!!!!!!!
 
 	// DiscordMarket
-	const youTubeMarketFactory = await ethers.getContractFactory('DiscordMarket')
-	const youTubeMarket = await youTubeMarketFactory.deploy()
-	await youTubeMarket.deployed()
+	const discordMarketFactory = await ethers.getContractFactory('DiscordMarket')
+	const discordMarket = await discordMarketFactory.deploy()
+	await discordMarket.deployed()
 
 	const data = ethers.utils.arrayify('0x')
 
 	// MarketProxy
 	const marketProxyFactory = await ethers.getContractFactory('MarketProxy')
 	const marketProxy = await marketProxyFactory.deploy(
-		youTubeMarket.address,
+		discordMarket.address,
 		adminAddress,
 		data
 	)
 	await marketProxy.deployed()
 
-	const proxy = youTubeMarketFactory.attach(marketProxy.address)
+	const proxy = discordMarketFactory.attach(marketProxy.address)
 	await proxy.initialize()
 	await proxy.addKhaosRole(khaosWallet)
 
-	console.log('discord market deployed to:', youTubeMarket.address)
+	console.log('discord market deployed to:', discordMarket.address)
 	console.log('market proxy deployed to:', marketProxy.address)
 	console.log('market proxy khaosRole is attached to:', khaosWallet)
 }
