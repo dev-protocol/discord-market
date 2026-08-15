@@ -1,8 +1,13 @@
 {
-	"name": "template-repos-ts-sol",
+	"name": "@devprotocol/discord-market",
 	"version": "1.0.0",
-	"description": "Template repository for using TypeScript and Solidity",
+	"description": "Discord market contracts for the Dev Protocol ecosystem",
 	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dev-protocol/discord-market.git"
+	},
+	"author": "Dev Protocol",
 	"scripts": {
 		"test": "hardhat test",
 		"pretest": "yarn generate",
@@ -16,8 +21,6 @@
 		"prebuild": "yarn generate",
 		"clean": "rimraf scripts/**/*.js build"
 	},
-	"author": "",
-	"license": "MPL-2.0",
 	"devDependencies": {
 		"@nomiclabs/hardhat-ethers": "2.1.1",
 		"@nomiclabs/hardhat-waffle": "2.0.5",
